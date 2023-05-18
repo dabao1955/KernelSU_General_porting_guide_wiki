@@ -14,7 +14,7 @@ CONFIG_KPROBES=y
 CONFIG_HAVE_KPROBES=y
 CONFIG_KPROBE_EVENTS=y
 CONFIG_MODULES=y
-CONFIG_OVERLAYFS=Y
+CONFIG_OVERLAYFS=y
 ```
 如果你在集成 KernelSU 之后手机无法启动，那么很可能你的内核中 kprobe 工作不正常，你需要修复这个 bug 或者用第二种方法。
 ### 手动添加kernelSU
