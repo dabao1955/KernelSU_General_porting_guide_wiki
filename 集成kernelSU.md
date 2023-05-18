@@ -21,6 +21,7 @@ CONFIG_OVERLAYFS=y
 主要是要改四个地方：
 
 - do_faccessat，通常位于 fs/open.c
+
 参考
 ```bash
 @@ -348,6 +348,8 @@ SYSCALL_DEFINE4(fallocate, int, fd, int, mode, loff_t, offset, loff_t, len)
@@ -42,6 +43,7 @@ CONFIG_OVERLAYFS=y
  	struct path path;
 ```
 - do_execveat_common，通常位于 fs/exec.c
+
 参考
 ```bash
 @@ -1890,11 +1890,14 @@ static int __do_execve_file(int fd, struct filename *filename,
@@ -60,6 +62,7 @@ CONFIG_OVERLAYFS=y
  }
 ```
 - vfs_read，通常位于 fs/read_write.c
+
 参考
 ```bash
 @@ -434,10 +434,14 @@ ssize_t kernel_read(struct file *file, void *buf, size_t count, loff_t *pos)
@@ -79,6 +82,7 @@ CONFIG_OVERLAYFS=y
  	if (!(file->f_mode & FMODE_CAN_READ))
 ```
 - vfs_statx，通常位于 fs/stat.c
+
 参考
 ```bash
 @@ -148,6 +148,8 @@ int vfs_statx_fd(unsigned int fd, struct kstat *stat,
