@@ -17,6 +17,7 @@ CONFIG_MODULES=y
 CONFIG_OVERLAYFS=y
 ```
 如果你在集成 KernelSU 之后手机无法启动，那么很可能你的内核中 kprobe 工作不正常，你需要修复这个 bug 或者用第二种方法。
+~~有没有一种可能，是镜像打包当时不对或者avb没关？~~
 ### 手动添加kernelSU
 主要是要改四个地方：
 
