@@ -1,7 +1,9 @@
 此WIKI来源自 **[HuaweiP10-GSI-And-Modify-Or-Support-KernelSU-Tutorial](https://github.com/Coconutat/HuaweiP10-GSI-And-Modify-Or-Support-KernelSU-Tutorial)**   
-此文档遵循 **[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)** 许可协议
+作者: [Coconutat @Github](https://github.com/Coconutat)  / [Coconutat_Ian @Bilibili](https://space.bilibili.com/1478718418) / [NeonZhang @Coolapk](https://www.coolapk.com/u/1071748)  
+此文档遵循 **[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)** 许可协议  
 
 # 如何为华为4.9版本内核集成KernelSU  
+视频版教程：[如何为华为EMUI9内核集成KernelSU及编译内核 @Bilibili](https://www.bilibili.com/video/BV1hV4y1k7sQ/)
 很多朋友希望能对华为老设备集成KernelSU，但又苦于不知如何下手，于是四处求人希望一些有能力编译的朋友去编译一个。  
 正巧看到[KernelSU旧内核编译实践教程](https://www.bilibili.com/video/BV1cX4y127gQ)这个视频，  
 里面只是简单提到华为的开源的内核在哪里下载，提示了一些对于小米的编译过程。  
@@ -19,9 +21,9 @@
 ***  
 ### 第二节：获取内核  
 前置资源：  
-1. [华为开源资源发布中心](https://consumer.huawei.com/en/opensource/)  
-2. [AArch64交叉编译器_安卓9版本](https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/+archive/refs/heads/pie-release.tar.gz)  
-3. 一台搭载Linux开发版系统的实体电脑或者虚拟机。  
+1. 内核获取参考：[内核源码获取](内核源码获取.md)
+2. GCC交叉编译器，华为只兼容此版本：[AArch64交叉编译器_安卓9版本](https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/+archive/refs/heads/pie-release.tar.gz)  
+3. 一台搭载Linux开发版系统的实体电脑或者虚拟机。参考：[准备工作](准备工作.md)  
 
 首先明确手机的开发代号，在手机设置里面和系统版本挨着。  
 比如华为P10是VTR，P10 Plus是VKY。后面的-AL00之类的是华为为了区分在哪个地区售卖的地区编码。  
@@ -121,9 +123,16 @@ Debug用：
 参考第166行。  
 ***  
 ### 第五节：编译  
-这个部分没啥好说的，可以参考网上很多教程。这里简单说一下就行。  
-安装依赖：
-`sudo apt install git-core gnupg flex bison gperf build-essential zip curl zlib1g-dev gcc-multilib g++-multilib libc6-dev-i386 lib32ncurses5-dev x11proto-core-dev libx11-dev lib32z-dev libgl1-mesa-dev libxml2-utils xsltproc unzip bc`    
+参见：[编译内核](编译内核.md)  
+安装依赖：  
+参见：[准备工作](准备工作.md)  
+
+额外需求：  
+Python 2.7 : `sudo apt install python2`  
+然后输入命令：`sudo ln -sf /usr/bin/python2.7 /usr/bin/python`  
+使得默认Python是Python2.7(华为官方内核源码不兼容Python3.)  
+
+
 设置环境变量：  
 `export ARCH=arm64`  
 `export PATH=$PATH:/media/coconutat/Files/Downloads/Github/android_kernel_huawei_ravel_KernelSU`  
@@ -145,8 +154,8 @@ Debug用：
 我们需要把它复制到内核源码下的tools文件夹，你在里面能找到一个叫**pack_kernerimage_cmd.sh**的脚本。  
 我们需要修改它，我以华为开源的荣耀Note10的内核里面的打包参数举例：  
 `
-#!/bin/bash
-./mkbootimg --kernel kernel --base 0x0 --cmdline "loglevel=4 initcall_debug=n page_tracker=on unmovable_isolate1=2:192M,3:224M,4:256M printktimer=0xfff0a000,0x534,0x538 androidboot.selinux=enforcing buildvariant=user" --tags_offset 0x07A00000 --kernel_offset 0x00080000 --ramdisk_offset 0x07C00000 --header_version 1 --os_version 9 --os_patch_level 2020-01-01  --output kernel.img
+#!/bin/bash  
+./mkbootimg --kernel kernel --base 0x0 --cmdline "loglevel=4 initcall_debug=n page_tracker=on unmovable_isolate1=2:192M,3:224M,4:256M printktimer=0xfff0a000,0x534,0x538 androidboot.selinux=enforcing buildvariant=user" --tags_offset 0x07A00000 --kernel_offset 0x00080000 --ramdisk_offset 0x07C00000 --header_version 1 --os_version 9 --os_patch_level 2020-01-01  --output kernel.img  
 `  
   
 --kernel kernel 这部分指的是内核文件的位置。假设你把内核复制进tools文件夹了，那应该修改成：  
