@@ -22,9 +22,9 @@
 ***  
 ### 第二节：获取内核  
 前置资源：  
-1. 内核获取参考：[内核源码获取](内核源码获取.md)
+1. 内核获取参考：[内核源码获取](https://github.com/dabao1955/KernelSU_General_porting_guide/wiki/内核源码获取)
 2. GCC交叉编译器，华为只兼容此版本：[AArch64交叉编译器_安卓9版本](https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/+archive/refs/heads/pie-release.tar.gz)  
-3. 一台搭载Linux开发版系统的实体电脑或者虚拟机。参考：[准备工作](准备工作.md)  
+3. 一台搭载Linux开发版系统的实体电脑或者虚拟机。参考：[准备工作](https://github.com/dabao1955/KernelSU_General_porting_guide/wiki/准备工作)  
 
 首先明确手机的开发代号，在手机设置里面和系统版本挨着。  
 比如华为P10是VTR，P10 Plus是VKY。后面的-AL00之类的是华为为了区分在哪个地区售卖的地区编码。  
