@@ -129,9 +129,9 @@ Debug用：
 参考第166行。  
 ***  
 ### 第五节：编译  
-参见：[编译内核](编译内核.md)  
+参见：[编译内核](https://github.com/dabao1955/KernelSU_General_porting_guide/wiki/编译内核)  
 安装依赖：  
-参见：[准备工作](准备工作.md)  
+参见：[准备工作](https://github.com/dabao1955/KernelSU_General_porting_guide/wiki/准备工作)  
 
 额外需求：  
 Python 2.7 : `sudo apt install python2`  
