@@ -87,12 +87,16 @@ CONFIG_HWAA=y
 改动此处是方便开机的时候手机SELinux默认是Permissive状态。  
 > 注：在集成KernelSU的情况下，此处仅限刷入高于安卓9以上的GSI系统的情况下。原因会在下面解释。  
   
-关闭AVB验证：  
-`CONFIG_DM_VERITY=y`  
-`CONFIG_DM_VERITY_AVB=y`  
+关闭AVB验证： 
+```  
+CONFIG_DM_VERITY=y  
+CONFIG_DM_VERITY_AVB=y
+```   
 改为  
-`# CONFIG_DM_VERITY=y is not set`  
-`# CONFIG_DM_VERITY_AVB=y is not set`  
+``` 
+# CONFIG_DM_VERITY=y is not set  
+# CONFIG_DM_VERITY_AVB=y is not set 
+```   
   
 
 Debug用：   
@@ -135,17 +139,21 @@ Python 2.7 : `sudo apt install python2`
 使得默认Python是Python2.7(华为官方内核源码不兼容Python3.)  
 
 
-设置环境变量：  
-`export ARCH=arm64`  
-`export PATH=$PATH:/media/coconutat/Files/Downloads/Github/android_kernel_huawei_ravel_KernelSU`  
-`android_kernel_huawei_ravel_KernelSU/aarch64-linux-android-4.9/bin`  
-`export CROSS_COMPILE=aarch64-linux-android-`  
+设置环境变量： 
+``` 
+export ARCH=arm64  
+export PATH=$PATH:/media/coconutat/Files/Downloads/Github/android_kernel_huawei_ravel_KernelSU  
+android_kernel_huawei_ravel_KernelSU/aarch64-linux-android-4.9/bin  
+export CROSS_COMPILE=aarch64-linux-android-
+```     
 这里第一行是声明你要编译arm64架构的内核。  
 第二行，第三行是声明你的交叉编译器的路径，需要根据你自己的路径进行修改。  
    
-编译命令：   
-`make ARCH=arm64 O=out XXXXXX_defconfig`  
-`make ARCH=arm64 O=out -j8`  
+编译命令： 
+```     
+make ARCH=arm64 O=out XXXXXX_defconfig  
+make ARCH=arm64 O=out -j8
+```   
 这里第一行是声明你编译的内核的defconfig，需要根据你自己的defconfig名称进行修改。   
 第二行是声明编译的线程数，基于CPU核心数量x2即可，我是4核心，所以是8。  
 
@@ -155,10 +163,10 @@ Python 2.7 : `sudo apt install python2`
 如果内核编译成功，在out/arch/arm64/boot/路径下会有一个Image.gz文件，这就是内核了。  
 我们需要把它复制到内核源码下的tools文件夹，你在里面能找到一个叫**pack_kernerimage_cmd.sh**的脚本。  
 我们需要修改它，我以华为开源的荣耀Note10的内核里面的打包参数举例：  
-`#!/bin/bash`  
-`
+``` 
+#!/bin/bash 
 ./mkbootimg --kernel kernel --base 0x0 --cmdline "loglevel=4 initcall_debug=n page_tracker=on unmovable_isolate1=2:192M,3:224M,4:256M printktimer=0xfff0a000,0x534,0x538 androidboot.selinux=enforcing buildvariant=user" --tags_offset 0x07A00000 --kernel_offset 0x00080000 --ramdisk_offset 0x07C00000 --header_version 1 --os_version 9 --os_patch_level 2020-01-01  --output kernel.img  
-`  
+```  
   
 --kernel kernel 这部分指的是内核文件的位置。假设你把内核复制进tools文件夹了，那应该修改成：  
 `--kernel Image.gz`    
