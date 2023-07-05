@@ -3,7 +3,8 @@
 此文档遵循 **[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)** 许可协议  
 
 # 如何为华为4.9版本内核集成KernelSU  
-视频版教程：[如何为华为EMUI9内核集成KernelSU及编译内核 @Bilibili](https://www.bilibili.com/video/BV1hV4y1k7sQ/)
+视频版教程：[如何为华为EMUI9内核集成KernelSU及编译内核 @Bilibili](https://www.bilibili.com/video/BV1hV4y1k7sQ/)  
+***
 很多朋友希望能对华为老设备集成KernelSU，但又苦于不知如何下手，于是四处求人希望一些有能力编译的朋友去编译一个。  
 正巧看到[KernelSU旧内核编译实践教程](https://www.bilibili.com/video/BV1cX4y127gQ)这个视频，  
 里面只是简单提到华为的开源的内核在哪里下载，提示了一些对于小米的编译过程。  
