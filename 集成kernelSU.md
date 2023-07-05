@@ -1,5 +1,8 @@
 # 集成KernelSU
-KernelSU 可以被集成到非 GKI 内核中，现在它最低支持到内核 4.14 版本；理论上也可以支持更低的版本。
+
+注:本页面可能有滞后性。如果有的话，请参考[官方页面](https://kernelsu.org/zh_CN/guide/how-to-integrate-for-non-gki.html)并发起issue要求作者进行整改
+
+**KernelSU 可以被集成到非 GKI 内核中，现在它最低支持到内核 4.14 版本；理论上也可以支持更低的版本。**
 
 ### 通过kprobes集成
 KernelSU 使用 kprobe 机制来做内核的相关 hook，如果 kprobe 可以在你编译的内核中正常运行，那么推荐用这个方法来集成。
@@ -18,6 +21,10 @@ CONFIG_OVERLAYFS=y
 ```
 如果你在集成 KernelSU 之后手机无法启动，那么很可能你的内核中 kprobe 工作不正常，你需要修复这个 bug 或者用第二种方法。
 
+
+### 如何验证是否是 kprobe 的问题？
+
+注释掉 `KernelSU/kernel/ksu.c` 中 `ksu_enable_sucompat()` 和 `ksu_enable_ksud()`，如果正常开机，那么就是 kprobe 的问题；或者你可以手动尝试使用 kprobe 功能，如果不正常，手机会直接重启。
 
 ### 手动添加kernelSU
 主要是要改四个地方：
@@ -52,14 +59,20 @@ CONFIG_OVERLAYFS=y
  	return retval;
  }
  
++extern bool ksu_execveat_hook __read_mostly;
 +extern int ksu_handle_execveat(int *fd, struct filename **filename_ptr, void *argv,
 +			void *envp, int *flags);
++extern int ksu_handle_execveat_sucompat(int *fd, struct filename **filename_ptr,
++				 void *argv, void *envp, int *flags);
  static int do_execveat_common(int fd, struct filename *filename,
  			      struct user_arg_ptr argv,
  			      struct user_arg_ptr envp,
  			      int flags)
  {
-+	ksu_handle_execveat(&fd, &filename, &argv, &envp, &flags);
++	if (unlikely(ksu_execveat_hook))
++		ksu_handle_execveat(&fd, &filename, &argv, &envp, &flags);
++	else
++		ksu_handle_execveat_sucompat(&fd, &filename, &argv, &envp, &flags);
  	return __do_execve_file(fd, filename, argv, envp, flags, NULL);
  }
 ```
@@ -71,17 +84,20 @@ CONFIG_OVERLAYFS=y
  }
  EXPORT_SYMBOL(kernel_read);
  
++extern bool ksu_vfs_read_hook __read_mostly;
 +extern int ksu_handle_vfs_read(struct file **file_ptr, char __user **buf_ptr,
 +			size_t *count_ptr, loff_t **pos);
  ssize_t vfs_read(struct file *file, char __user *buf, size_t count, loff_t *pos)
  {
  	ssize_t ret;
  
-+	ksu_handle_vfs_read(&file, &buf, &count, &pos);
-+	
++	if (unlikely(ksu_vfs_read_hook))
++		ksu_handle_vfs_read(&file, &buf, &count, &pos);
++
  	if (!(file->f_mode & FMODE_READ))
  		return -EBADF;
  	if (!(file->f_mode & FMODE_CAN_READ))
+
 ```
 - vfs_statx，通常位于 fs/stat.c
 
@@ -147,4 +163,29 @@ CONFIG_OVERLAYFS=y
  	if (mode & ~S_IRWXO)	/* where's F_OK, X_OK, W_OK, R_OK? */
  		return -EINVAL;
 ```
+
+
+要使用 KernelSU 内置的安全模式，你还需要修改 `drivers/input/input.c` 中的 `input_handle_event` 方法：
+
+```
+@@ -367,10 +367,13 @@ static int input_get_disposition(struct input_dev *dev,
+ 	return disposition;
+ }
+ 
++extern bool ksu_input_hook __read_mostly;
++extern int ksu_handle_input_handle_event(unsigned int *type, unsigned int *code, int *value);
++
+ static void input_handle_event(struct input_dev *dev,
+ 			       unsigned int type, unsigned int code, int value)
+ {
+	int disposition = input_get_disposition(dev, type, code, &value);
++
++	if (unlikely(ksu_input_hook))
++		ksu_handle_input_handle_event(&type, &code, &value);
+ 
+ 	if (disposition != INPUT_IGNORE_EVENT && type != EV_SYN)
+ 		add_input_randomness(type, code, value);
+
+```
+
 然后重新编译即可。
