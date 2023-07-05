@@ -153,8 +153,8 @@ Python 2.7 : `sudo apt install python2`
 如果内核编译成功，在out/arch/arm64/boot/路径下会有一个Image.gz文件，这就是内核了。  
 我们需要把它复制到内核源码下的tools文件夹，你在里面能找到一个叫**pack_kernerimage_cmd.sh**的脚本。  
 我们需要修改它，我以华为开源的荣耀Note10的内核里面的打包参数举例：  
+`#!/bin/bash`  
 `
-#!/bin/bash  
 ./mkbootimg --kernel kernel --base 0x0 --cmdline "loglevel=4 initcall_debug=n page_tracker=on unmovable_isolate1=2:192M,3:224M,4:256M printktimer=0xfff0a000,0x534,0x538 androidboot.selinux=enforcing buildvariant=user" --tags_offset 0x07A00000 --kernel_offset 0x00080000 --ramdisk_offset 0x07C00000 --header_version 1 --os_version 9 --os_patch_level 2020-01-01  --output kernel.img  
 `  
   
