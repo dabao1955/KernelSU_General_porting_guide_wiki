@@ -34,5 +34,5 @@ KernelSU不兼容安卓10以下设备，所以无法正确处理低于安卓10�
 
 ~~需要手动修改KernelSU源码,参考[此提交](https://github.com/longhuan1999/KernelSU/commit/56ca12d550875efe7cac45b3a16d9dce678a8b85)~~
 
-
+N:[此PR](https://github.com/tiann/KernelSU/pull/973/)可能解决了这个问题
 
