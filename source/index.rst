@@ -3,12 +3,15 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to ksu-general-porting-guide's documentation!
+Welcome to ksu-general-porting-guide docs!
 =====================================================
 
 .. toctree::
    :maxdepth: 10
    :caption: Contents:
+
+Table of contents
+------------------
 
   :ref:`KernelSU简介 <doc/KernelSU简介>`
   :ref:`准备工作 <doc/准备工作>`
