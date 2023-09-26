@@ -1,0 +1,30 @@
+name: build-page
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repo
+      uses: actions/checkout@v4
+
+    # Run using Python 3.8 for consistency and aiohttp
+    - name: Setup Python 
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Setup Env
+      run: pip install -r requirements.txt
+
+    - name: Build Page
+      run: make html
+      
