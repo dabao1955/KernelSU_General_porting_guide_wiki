@@ -33,6 +33,10 @@ CONFIG_OVERLAY_FS=y   #模块运行依赖于overlayfs，不开也行
 
 参考
 ```bash
+diff --git a/fs/open.c b/fs/open.c
+index 05036d819197..965b84d486b8 100644
+--- a/fs/open.c
++++ b/fs/open.c
 @@ -348,6 +348,8 @@ SYSCALL_DEFINE4(fallocate, int, fd, int, mode, loff_t, offset, loff_t, len)
  	return ksys_fallocate(fd, mode, offset, len);
  }
@@ -46,15 +50,27 @@ CONFIG_OVERLAY_FS=y   #模块运行依赖于overlayfs，不开也行
   */
  long do_faccessat(int dfd, const char __user *filename, int mode)
  {
-+	ksu_handle_faccessat(&dfd, &filename, &mode, NULL);
  	const struct cred *old_cred;
  	struct cred *override_cred;
  	struct path path;
+ 	struct inode *inode;
+ 	struct vfsmount *mnt;
+ 	int res;
+ 	unsigned int lookup_flags = LOOKUP_FOLLOW;
+ 
++	ksu_handle_faccessat(&dfd, &filename, &mode, NULL);
+ 
+ 	if (mode & ~S_IRWXO)	/* where's F_OK, X_OK, W_OK, R_OK? */
+ 		return -EINVAL;
 ```
 - do_execveat_common，通常位于 fs/exec.c
 
 参考
 ```bash
+diff --git a/fs/exec.c b/fs/exec.c
+index ac59664eaecf..bdd585e1d2cc 100644
+--- a/fs/exec.c
++++ b/fs/exec.c
 @@ -1890,11 +1890,14 @@ static int __do_execve_file(int fd, struct filename *filename,
  	return retval;
  }
@@ -80,6 +96,10 @@ CONFIG_OVERLAY_FS=y   #模块运行依赖于overlayfs，不开也行
 
 参考
 ```bash
+diff --git a/fs/read_write.c b/fs/read_write.c
+index 650fc7e0f3a6..55be193913b6 100644
+--- a/fs/read_write.c
++++ b/fs/read_write.c
 @@ -434,10 +434,14 @@ ssize_t kernel_read(struct file *file, void *buf, size_t count, loff_t *pos)
  }
  EXPORT_SYMBOL(kernel_read);
@@ -97,12 +117,15 @@ CONFIG_OVERLAY_FS=y   #模块运行依赖于overlayfs，不开也行
  	if (!(file->f_mode & FMODE_READ))
  		return -EBADF;
  	if (!(file->f_mode & FMODE_CAN_READ))
-
 ```
 - vfs_statx，通常位于 fs/stat.c
 
 参考
 ```bash
+diff --git a/fs/stat.c b/fs/stat.c
+index 376543199b5a..82adcef03ecc 100644
+--- a/fs/stat.c
++++ b/fs/stat.c
 @@ -148,6 +148,8 @@ int vfs_statx_fd(unsigned int fd, struct kstat *stat,
  }
  EXPORT_SYMBOL(vfs_statx_fd);
@@ -123,6 +146,10 @@ CONFIG_OVERLAY_FS=y   #模块运行依赖于overlayfs，不开也行
 ```
 如果你的内核没有 vfs_statx, 使用 vfs_fstatat 来代替它：
 ```bash
+@@ -87,6 +87,8 @@ int diff --git a/fs/stat.c b/fs/stat.c
+index 068fdbcc9e26..5348b7bb9db2 100644
+--- a/fs/stat.c
++++ b/fs/stat.c
 @@ -87,6 +87,8 @@ int vfs_fstat(unsigned int fd, struct kstat *stat)
  }
  EXPORT_SYMBOL(vfs_fstat);
@@ -144,6 +171,10 @@ CONFIG_OVERLAY_FS=y   #模块运行依赖于overlayfs，不开也行
 ```
 对于早于 4.17 的内核，如果没有 do_faccessat，可以直接找到 faccessat 系统调用的定义然后修改：
 ```bash
+diff --git a/fs/open.c b/fs/open.c
+index 2ff887661237..e758d7db7663 100644
+--- a/fs/open.c
++++ b/fs/open.c
 @@ -355,6 +355,9 @@ SYSCALL_DEFINE4(fallocate, int, fd, int, mode, loff_t, offset, loff_t, len)
  	return error;
  }
@@ -168,6 +199,10 @@ CONFIG_OVERLAY_FS=y   #模块运行依赖于overlayfs，不开也行
 要使用 KernelSU 内置的安全模式，你还需要修改 `drivers/input/input.c` 中的 `input_handle_event` 方法：
 
 ```
+diff --git a/drivers/input/input.c b/drivers/input/input.c
+index 45306f9ef247..815091ebfca4 100755
+--- a/drivers/input/input.c
++++ b/drivers/input/input.c
 @@ -367,10 +367,13 @@ static int input_get_disposition(struct input_dev *dev,
  	return disposition;
  }
@@ -185,7 +220,6 @@ CONFIG_OVERLAY_FS=y   #模块运行依赖于overlayfs，不开也行
  
  	if (disposition != INPUT_IGNORE_EVENT && type != EV_SYN)
  		add_input_randomness(type, code, value);
-
 ```
 
 然后重新编译即可。
