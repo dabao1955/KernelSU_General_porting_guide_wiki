@@ -11,6 +11,8 @@ KernelSU 使用 kprobe 机制来做内核的相关 hook，如果 kprobe 可以�
 ```bash
 curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -
 ```
+如果你通过git clone的方式克隆了内核源码，且内核源码有KernelSU子仓库，只需要在内核源码根目录下执行`git submodule update --init`即可。
+
 然后，你需要检查你的内核是否开启了 kprobe 相关的配置，如果没有开启，需要编辑配置文件并添加以下内容
 ```bash
 CONFIG_KPROBES=y
