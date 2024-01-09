@@ -252,4 +252,38 @@ index 45306f9ef247..815091ebfca4 100755
  		add_input_randomness(type, code, value);
 ```
 
+对于部分欧加手机的内核源码由于添加了欧加特性可能需要修改patch:
+```bash
+diff --git a/fs/exec.c b/fs/exec.c
+index 2590c08fb696..c3859850bcf3 100644
+--- a/fs/exec.c
++++ b/fs/exec.c
+@@ -1713,6 +1713,12 @@ static int exec_binprm(struct linux_binprm *bprm)
+ 	return ret;
+ }
+#ifdef CONFIG_OPLUS_KERNEL_SECURE_GUARD
+extern int oplus_exec_block(struct file *file);
+#endif /* CONFIG_OPLUS_KERNEL_SECURE_GUARD
+ 
++extern bool ksu_execveat_hook __read_mostly;
++extern int ksu_handle_execveat(int *fd, struct filename **filename_ptr, void *argv,
++			void *envp, int *flags);
++extern int ksu_handle_execveat_sucompat(int *fd, struct filename **filename_ptr,
++				 void *argv, void *envp, int *flags);
++
+ /*
+  * sys_execve() executes a new program.
+  */
+@@ -1727,6 +1733,11 @@ static int do_execveat_common(int fd, struct filename *filename,
+ 	struct files_struct *displaced;
+ 	int retval;
+ 
++	if (unlikely(ksu_execveat_hook))
++		ksu_handle_execveat(&fd, &filename, &argv, &envp, &flags);
++	else
++		ksu_handle_execveat_sucompat(&fd, &filename, &argv, &envp, &flags);
++
+ 	if (IS_ERR(filename))
+ 		return PTR_ERR(filename);
+```
 然后重新编译即可。
