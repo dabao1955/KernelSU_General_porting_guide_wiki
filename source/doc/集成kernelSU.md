@@ -39,7 +39,7 @@ CONFIG_OVERLAY_FS=y   #模块运行依赖于overlayfs
 
 - do_faccessat，通常位于 fs/open.c
 
-```diff
+```patch
 diff --git a/fs/open.c b/fs/open.c
 index 05036d819197..965b84d486b8 100644
 --- a/fs/open.c
@@ -76,7 +76,7 @@ index 05036d819197..965b84d486b8 100644
 - do_execveat_common，通常位于 fs/exec.c
 
 
-```diff
+```patch
 diff --git a/fs/exec.c b/fs/exec.c
 index ac59664eaecf..bdd585e1d2cc 100644
 --- a/fs/exec.c
@@ -109,7 +109,7 @@ index ac59664eaecf..bdd585e1d2cc 100644
 - vfs_read，通常位于 fs/read_write.c
 
 
-```diff
+```patch
 diff --git a/fs/read_write.c b/fs/read_write.c
 index 650fc7e0f3a6..55be193913b6 100644
 --- a/fs/read_write.c
@@ -138,7 +138,7 @@ index 650fc7e0f3a6..55be193913b6 100644
 - vfs_statx，通常位于 fs/stat.c
 
 
-```diff
+```patch
 diff --git a/fs/stat.c b/fs/stat.c
 index 376543199b5a..82adcef03ecc 100644
 --- a/fs/stat.c
@@ -166,7 +166,7 @@ index 376543199b5a..82adcef03ecc 100644
  		return -EINVAL;
 ```
 如果你的内核没有 vfs_statx, 使用 vfs_fstatat 来代替它：
-```diff
+```patch
 diff --git a/fs/stat.c b/fs/stat.c
 index 068fdbcc9e26..5348b7bb9db2 100644
 --- a/fs/stat.c
@@ -194,7 +194,7 @@ index 068fdbcc9e26..5348b7bb9db2 100644
  		goto out;
 ```
 对于早于 4.17 的内核，如果没有 do_faccessat，可以直接找到 faccessat 系统调用的定义然后修改：
-```diff
+```patch
 diff --git a/fs/open.c b/fs/open.c
 index 2ff887661237..e758d7db7663 100644
 --- a/fs/open.c
@@ -225,7 +225,7 @@ index 2ff887661237..e758d7db7663 100644
 
 要使用 KernelSU 内置的安全模式，你还需要修改 `drivers/input/input.c` 中的 `input_handle_event` 方法：
 
-```diff
+```patch
 diff --git a/drivers/input/input.c b/drivers/input/input.c
 index 45306f9ef247..815091ebfca4 100755
 --- a/drivers/input/input.c
@@ -253,7 +253,7 @@ index 45306f9ef247..815091ebfca4 100755
 ```
 
 对于部分欧加手机的内核源码由于添加了欧加特性可能需要修改patch:
-```diff
+```patch
 diff --git a/fs/exec.c b/fs/exec.c
 index ac59664eaecf..bdd585e1d2cc 100644
 --- a/fs/exec.c
