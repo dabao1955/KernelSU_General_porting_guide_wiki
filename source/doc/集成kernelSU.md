@@ -287,3 +287,7 @@ extern int oplus_exec_block(struct file *file);
  }
 ```
 然后重新编译即可。
+
+### 莫名其妙进入安全模式？
+
+如果你采用手动集成的方式，并且没有禁用`CONFIG_KPROBES`，那么用户在开机之后按音量下，也可能触发安全模式！因此如果使用手动集成，你需要关闭 `CONFIG_KPROBES`！
