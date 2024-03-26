@@ -21,6 +21,16 @@ CONFIG_KPROBE_EVENTS=y
 CONFIG_MODULES=y
 CONFIG_OVERLAY_FS=y   #模块运行依赖于overlayfs
 ```
+对于 OPLUS 设备，你需要在 nativefeatures.mk (4.14+) 或者 oplus_native_features.mk (4.19+) 中查找并关闭以下内容:
+
+```bash
+#OPLUS_FEATURE_SECURE_GUARD=no
+#OPLUS_FEATURE_SECURE_ROOTGUARD=yes
+#OPLUS_FEATURE_SECURE_MOUNTGUARD=yes
+#OPLUS_FEATURE_SECURE_EXECGUARD=yes
+#OPLUS_FEATURE_SECURE_KEVENTUPLOAD=yes
+```
+
 如果你在集成 KernelSU 之后手机无法启动，那么很可能你的内核中 kprobe 工作不正常，你需要修复这个 bug 或者用第二种方法。
 
 
@@ -286,6 +296,56 @@ extern int oplus_exec_block(struct file *file);
  	return __do_execve_file(fd, filename, argv, envp, flags, NULL);
  }
 ```
+
+### 如何backport(向旧版本移植) path_umount {#how-to-backport-path-umount}
+
+你可以通过从K5.9向旧版本移植`path_umount`，在GKI之前的内核上获得卸载模块的功能。你可以通过以下补丁作为参考:
+
+```diff
+--- a/fs/namespace.c
++++ b/fs/namespace.c
+@@ -1739,6 +1739,39 @@ static inline bool may_mandlock(void)
+ }
+ #endif
+
++static int can_umount(const struct path *path, int flags)
++{
++	struct mount *mnt = real_mount(path->mnt);
++
++	if (flags & ~(MNT_FORCE | MNT_DETACH | MNT_EXPIRE | UMOUNT_NOFOLLOW))
++		return -EINVAL;
++	if (!may_mount())
++		return -EPERM;
++	if (path->dentry != path->mnt->mnt_root)
++		return -EINVAL;
++	if (!check_mnt(mnt))
++		return -EINVAL;
++	if (mnt->mnt.mnt_flags & MNT_LOCKED) /* Check optimistically */
++		return -EINVAL;
++	if (flags & MNT_FORCE && !capable(CAP_SYS_ADMIN))
++		return -EPERM;
++	return 0;
++}
++
++int path_umount(struct path *path, int flags)
++{
++	struct mount *mnt = real_mount(path->mnt);
++	int ret;
++
++	ret = can_umount(path, flags);
++	if (!ret)
++		ret = do_umount(mnt, flags);
++
++	/* we mustn't call path_put() as that would clear mnt_expiry_mark */
++	dput(path->dentry);
++	mntput_no_expire(mnt);
++	return ret;
++}
+ /*
+  * Now umount can handle mount points as well as block devices.
+  * This is important for filesystems which use unnamed block devices.
+```
+
 然后重新编译即可。
 
 ### 莫名其妙进入安全模式？
