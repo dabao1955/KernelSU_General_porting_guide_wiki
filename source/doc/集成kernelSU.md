@@ -47,6 +47,12 @@ CONFIG_OVERLAY_FS=y   #模块运行依赖于overlayfs
 `[ ] KernelSU function support`
 并保存退出。
 
+或者使用
+```
+scripts/config --file .config -e LTO_CLANG #在内核源码目录下执行
+```
+将.config路径换成实际的.config路径
+
 - do_faccessat，通常位于 fs/open.c
 
 ```patch
@@ -231,7 +237,9 @@ index 2ff887661237..e758d7db7663 100644
  	if (mode & ~S_IRWXO)	/* where's F_OK, X_OK, W_OK, R_OK? */
  		return -EINVAL;
 ```
-
+### 安全模式 
+#### 莫名其妙进入安全模式？
+如果你采用手动集成的方式，并且没有禁用`CONFIG_KPROBES`，那么用户在开机之后按音量下，也可能触发安全模式！因此如果使用手动集成，你需要关闭 `CONFIG_KPROBES`！
 
 要使用 KernelSU 内置的安全模式，你还需要修改 `drivers/input/input.c` 中的 `input_handle_event` 方法：
 
@@ -296,6 +304,33 @@ extern int oplus_exec_block(struct file *file);
  	return __do_execve_file(fd, filename, argv, envp, flags, NULL);
  }
 ```
+### pm 命令执行失败？
+
+你需要同时修改 `fs/devpts/inode.c`，补丁如下：
+
+```diff
+diff --git a/fs/devpts/inode.c b/fs/devpts/inode.c
+index 32f6f1c68..d69d8eca2 100644
+--- a/fs/devpts/inode.c
++++ b/fs/devpts/inode.c
+@@ -602,6 +602,8 @@ struct dentry *devpts_pty_new(struct pts_fs_info *fsi, int index, void *priv)
+        return dentry;
+ }
+
++extern int ksu_handle_devpts(struct inode*);
++
+ /**
+  * devpts_get_priv -- get private data for a slave
+  * @pts_inode: inode of the slave
+@@ -610,6 +612,7 @@ struct dentry *devpts_pty_new(struct pts_fs_info *fsi, int index, void *priv)
+  */
+ void *devpts_get_priv(struct dentry *dentry)
+ {
++       ksu_handle_devpts(dentry->d_inode);
+        if (dentry->d_sb->s_magic != DEVPTS_SUPER_MAGIC)
+                return NULL;
+        return dentry->d_fsdata;
+```
 
 ### 如何backport(向旧版本移植) path_umount {#how-to-backport-path-umount}
 
@@ -347,7 +382,3 @@ extern int oplus_exec_block(struct file *file);
 ```
 
 然后重新编译即可。
-
-### 莫名其妙进入安全模式？
-
-如果你采用手动集成的方式，并且没有禁用`CONFIG_KPROBES`，那么用户在开机之后按音量下，也可能触发安全模式！因此如果使用手动集成，你需要关闭 `CONFIG_KPROBES`！
