@@ -49,13 +49,13 @@ CONFIG_OVERLAY_FS=y   #模块运行依赖于overlayfs
 
 或者使用
 ```
-scripts/config --file .config -e LTO_CLANG #在内核源码目录下执行
+scripts/config --file .config -e KSU #在内核源码目录下执行
 ```
 将.config路径换成实际的.config路径
 
 - do_faccessat，通常位于 fs/open.c
 
-```patch
+```
 diff --git a/fs/open.c b/fs/open.c
 index 05036d819197..965b84d486b8 100644
 --- a/fs/open.c
@@ -92,7 +92,7 @@ index 05036d819197..965b84d486b8 100644
 - do_execveat_common，通常位于 fs/exec.c
 
 
-```patch
+```
 diff --git a/fs/exec.c b/fs/exec.c
 index ac59664eaecf..bdd585e1d2cc 100644
 --- a/fs/exec.c
@@ -125,7 +125,7 @@ index ac59664eaecf..bdd585e1d2cc 100644
 - vfs_read，通常位于 fs/read_write.c
 
 
-```patch
+```
 diff --git a/fs/read_write.c b/fs/read_write.c
 index 650fc7e0f3a6..55be193913b6 100644
 --- a/fs/read_write.c
@@ -154,7 +154,7 @@ index 650fc7e0f3a6..55be193913b6 100644
 - vfs_statx，通常位于 fs/stat.c
 
 
-```patch
+```
 diff --git a/fs/stat.c b/fs/stat.c
 index 376543199b5a..82adcef03ecc 100644
 --- a/fs/stat.c
@@ -182,7 +182,7 @@ index 376543199b5a..82adcef03ecc 100644
  		return -EINVAL;
 ```
 如果你的内核没有 vfs_statx, 使用 vfs_fstatat 来代替它：
-```patch
+```
 diff --git a/fs/stat.c b/fs/stat.c
 index 068fdbcc9e26..5348b7bb9db2 100644
 --- a/fs/stat.c
@@ -210,7 +210,7 @@ index 068fdbcc9e26..5348b7bb9db2 100644
  		goto out;
 ```
 对于早于 4.17 的内核，如果没有 do_faccessat，可以直接找到 faccessat 系统调用的定义然后修改：
-```patch
+```
 diff --git a/fs/open.c b/fs/open.c
 index 2ff887661237..e758d7db7663 100644
 --- a/fs/open.c
@@ -238,12 +238,10 @@ index 2ff887661237..e758d7db7663 100644
  		return -EINVAL;
 ```
 ### 安全模式 
-#### 莫名其妙进入安全模式？
-如果你采用手动集成的方式，并且没有禁用`CONFIG_KPROBES`，那么用户在开机之后按音量下，也可能触发安全模式！因此如果使用手动集成，你需要关闭 `CONFIG_KPROBES`！
 
 要使用 KernelSU 内置的安全模式，你还需要修改 `drivers/input/input.c` 中的 `input_handle_event` 方法：
 
-```patch
+```
 diff --git a/drivers/input/input.c b/drivers/input/input.c
 index 45306f9ef247..815091ebfca4 100755
 --- a/drivers/input/input.c
@@ -269,6 +267,8 @@ index 45306f9ef247..815091ebfca4 100755
  	if (disposition != INPUT_IGNORE_EVENT && type != EV_SYN)
  		add_input_randomness(type, code, value);
 ```
+#### 莫名其妙进入安全模式？
+如果你采用手动集成的方式，并且没有禁用`CONFIG_KPROBES`，那么用户在开机之后按音量下，也可能触发安全模式！因此如果使用手动集成，你需要关闭 `CONFIG_KPROBES`！
 
 对于部分欧加手机的内核源码由于添加了欧加特性可能需要修改patch:
 ```patch
