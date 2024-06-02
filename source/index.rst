@@ -3,8 +3,10 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-    End of Life
-    ==============
+
+
+End of Life
+==============
 
     This project has fulfilled its historic mission. See `KernelSU's release note <https://github.com/tiann/KernelSU/releases/tag/v1.0.0>`_ for more details.
     This project will not be archived because something is still useful.
