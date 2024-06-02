@@ -1,7 +1,5 @@
 # 集成KernelSU
 
-注:本页面可能有滞后性。如果有的话，请参考[官方页面](https://kernelsu.org/zh_CN/guide/how-to-integrate-for-non-gki.html)并发起issue要求作者进行整改
-
 **KernelSU 可以被集成到非 GKI 内核中，现在它最低支持到内核 4.14 版本；理论上也可以支持更低的版本。**
 
 ### 通过kprobes集成
@@ -9,9 +7,23 @@ KernelSU 使用 kprobe 机制来做内核的相关 hook，如果 kprobe 可以�
 
 首先，把 KernelSU 添加到你的内核源码树，在内核的根目录执行以下命令：
 ```bash
-curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -
+curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash - v0.9.5
 ```
-如果你通过git clone的方式克隆了内核源码，且内核源码有KernelSU子仓库，只需要在内核源码根目录下执行`git submodule update --init`即可。
+
+请注意：[KernelSU 1.0 已经不再支持非 GKI 内核](https://github.com/tiann/KernelSU/issues/1705)，最后的支持版本为 `v0.9.5`，请注意使用正确的分支。
+
+如果你通过git clone的方式克隆了内核源码，且内核源码有KernelSU子仓库，请依次执行:
+```bash
+cd KernelSU #假如当前位置为内核源码根目录
+git sumbudule update --init
+git checkout v0.9.5
+```
+如果需要推送更改到远程仓库，还需要:
+```bash
+git add . #假如当前位置为KernelSU目录
+git commit -m "drivers/kernelsu: switch to v0.9.5"
+git push 
+```
 
 然后，你需要检查你的内核是否开启了 kprobe 相关的配置，如果没有开启，需要编辑配置文件并按需添加以下内容
 ```bash
